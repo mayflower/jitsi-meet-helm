@@ -5,11 +5,23 @@ metadata:
   namespace: {{ .Release.Namespace }}
 
 data:
+  AUTH_TYPE: internal
+  DOCKER_HOST_ADDRESS: 116.203.5.183
+  ENABLE_AUTH: "1"
+  ENABLE_GUESTS: "0"
+  JICOFO_AUTH_USER: focus
+  JVB_BREWERY_MUC: jvbbrewery
+  JVB_TCP_HARVESTER_DISABLED: "true"
+  JVB_AUTH_USER: jvb
+  JVB_ENABLE_APIS: rest,colibri
+  JVB_PORT: "30300"
+  JVB_STUN_SERVERS: stun.l.google.com:19302,stun1.l.google.com:19302,stun2.l.google.com:19302
+  TZ: Europe/Berlin
   PUBLIC_URL: https://jitsi.aletro.k8s.gomeetup.site
   XMPP_SERVER: localhost
   XMPP_DOMAIN: meet.jitsi
   XMPP_AUTH_DOMAIN: auth.meet.jitsi
   XMPP_INTERNAL_MUC_DOMAIN: internal-muc.meet.jitsi
-  JICOFO_AUTH_USER: focus
-  TZ: Europe/Berlin
-  JVB_BREWERY_MUC: jvbbrewery
+  XMPP_MUC_DOMAIN: auth.meet.jitsi
+  XMPP_BOSH_URL_BASE: http://127.0.0.1:5280
+
