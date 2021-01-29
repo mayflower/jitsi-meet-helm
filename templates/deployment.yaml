@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
+    {{- include "jitsi-meet-helm.labels" . | nindent 4 }}
     k8s-app: jitsi
   name: jitsi
   namespace: {{ .Release.Namespace }}

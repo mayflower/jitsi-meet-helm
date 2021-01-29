@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
+    {{- include "jitsi-meet-helm.labels" . | nindent 4 }}
     app.kubernetes.io/instance: jitsi-exporter
     app.kubernetes.io/name: jitsi-exporter
   name: jitsi-exporter

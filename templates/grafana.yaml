@@ -4,6 +4,7 @@ metadata:
   name: prometheus-operator-grafana-jitsi-dashboard
   namespace: monitoring
   labels:
+    {{- include "jitsi-meet-helm.labels" . | nindent 4 }}
     grafana_dashboard: "1"
 
 data:

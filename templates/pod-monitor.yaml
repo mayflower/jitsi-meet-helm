@@ -5,6 +5,7 @@ metadata:
   name: prometheus-monitor-jitsi-exporter
   namespace: monitoring
   labels:
+    {{- include "jitsi-meet-helm.labels" . | nindent 4 }}
     app: prometheus-operator
     release: prometheus-operator
 
