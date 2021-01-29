@@ -1,0 +1,13 @@
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: jitsi-dns
+
+spec:
+  endpoints:
+    - dnsName: jitsi.aletro.k8s.gomeetup.site
+      recordTTL: 300
+      recordType: A
+      targets:
+        - 116.203.5.183

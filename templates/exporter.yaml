@@ -1,0 +1,32 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: jitsi-exporter
+    app.kubernetes.io/name: jitsi-exporter
+  name: jitsi-exporter
+  namespace: {{ .Release.Namespace }}
+
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: jitsi-exporter
+      app.kubernetes.io/name: jitsi-exporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: jitsi-exporter
+        app.kubernetes.io/name: jitsi-exporter
+    spec:
+      containers:
+        - name: exporter
+          image: systemli/prometheus-jitsi-meet-exporter
+          imagePullPolicy: Always
+          ports:
+            - name: metrics
+              containerPort: 9888
+          command: ["/prometheus-jitsi-meet-exporter", "-videobridge-url", "http://web.jitsi:8080/colibri/stats"]

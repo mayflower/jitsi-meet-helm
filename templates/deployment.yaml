@@ -1,61 +1,176 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "jitsi-meet-helm.fullname" . }}
   labels:
-    {{- include "jitsi-meet-helm.labels" . | nindent 4 }}
+    k8s-app: jitsi
+  name: jitsi
+  namespace: {{ .Release.Namespace }}
+
 spec:
-{{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
-{{- end }}
+  replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
-      {{- include "jitsi-meet-helm.selectorLabels" . | nindent 6 }}
+      k8s-app: jitsi
   template:
     metadata:
-    {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
       labels:
-        {{- include "jitsi-meet-helm.selectorLabels" . | nindent 8 }}
+        k8s-app: jitsi
     spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      serviceAccountName: {{ include "jitsi-meet-helm.serviceAccountName" . }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          ports:
-            - name: http
-              containerPort: 80
-              protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
+        - name: jicofo
+          image: jitsi/jicofo
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: jitsi-env
+          env:
+            - name: JICOFO_COMPONENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jitsi-secret
+                  key: JICOFO_COMPONENT_SECRET
+            - name: JICOFO_AUTH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: jitsi-secret
+                  key: JICOFO_AUTH_PASSWORD
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+            limits:
+              cpu: 150m
+              memory: 150Mi
+            requests:
+              cpu: 50m
+              memory: 50Mi
+        - name: prosody
+          image: jitsi/prosody
+          imagePullPolicy: Always
+          env:
+            - name: PUBLIC_URL
+              value: https://jitsi.aletro.k8s.gomeetup.site
+            - name: XMPP_DOMAIN
+              value: meet.jitsi
+            - name: XMPP_AUTH_DOMAIN
+              value: auth.meet.jitsi
+            - name: XMPP_MUC_DOMAIN
+              value: muc.meet.jitsi
+            - name: XMPP_INTERNAL_MUC_DOMAIN
+              value: internal-muc.meet.jitsi
+            - name: JICOFO_COMPONENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jitsi-secret
+                  key: JICOFO_COMPONENT_SECRET
+            - name: JVB_AUTH_USER
+              value: jvb
+            - name: JVB_AUTH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: jitsi-secret
+                  key: JVB_AUTH_PASSWORD
+            - name: JICOFO_AUTH_USER
+              value: focus
+            - name: JICOFO_AUTH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: jitsi-secret
+                  key: JICOFO_AUTH_PASSWORD
+            - name: TZ
+              value: Europe/Berlin
+            - name: JVB_TCP_HARVESTER_DISABLED
+              value: "true"
+          resources:
+            limits:
+              cpu: 150m
+              memory: 150Mi
+            requests:
+              cpu: 50m
+              memory: 50Mi
+        - name: web
+          image: jitsi/web
+          imagePullPolicy: Always
+          env:
+            - name: PUBLIC_URL
+              value: https://jitsi.aletro.k8s.gomeetup.site
+            - name: XMPP_SERVER
+              value: localhost
+            - name: JICOFO_AUTH_USER
+              value: focus
+            - name: XMPP_DOMAIN
+              value: meet.jitsi
+            - name: XMPP_AUTH_DOMAIN
+              value: auth.meet.jitsi
+            - name: XMPP_INTERNAL_MUC_DOMAIN
+              value: internal-muc.meet.jitsi
+            - name: XMPP_BOSH_URL_BASE
+              value: http://127.0.0.1:5280
+            - name: XMPP_MUC_DOMAIN
+              value: muc.meet.jitsi
+            - name: ENABLE_AUTH
+              value: "1"
+            - name: ENABLE_GUESTS
+              value: "0"
+            - name: AUTH_TYPE
+              value: internal
+            - name: TZ
+              value: Europe/Berlin
+            - name: JVB_TCP_HARVESTER_DISABLED
+              value: "true"
+          resources:
+            limits:
+              cpu: 150m
+              memory: 150Mi
+            requests:
+              cpu: 25m
+              memory: 25Mi
+        - name: jvb
+          image: jitsi/jvb
+          imagePullPolicy: Always
+          env:
+            - name: PUBLIC_URL
+              value: https://jitsi.aletro.k8s.gomeetup.site
+            - name: XMPP_SERVER
+              value: localhost
+            - name: DOCKER_HOST_ADDRESS
+              value: 116.203.5.183
+            - name: XMPP_DOMAIN
+              value: meet.jitsi
+            - name: XMPP_AUTH_DOMAIN
+              value: auth.meet.jitsi
+            - name: XMPP_INTERNAL_MUC_DOMAIN
+              value: internal-muc.meet.jitsi
+            - name: JVB_STUN_SERVERS
+              value: stun.l.google.com:19302,stun1.l.google.com:19302,stun2.l.google.com:19302
+            - name: JICOFO_AUTH_USER
+              value: focus
+            - name: JVB_TCP_HARVESTER_DISABLED
+              value: "true"
+            - name: JVB_AUTH_USER
+              value: jvb
+            - name: JVB_PORT
+              value: "30300"
+            - name: JVB_AUTH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: jitsi-secret
+                  key: JVB_AUTH_PASSWORD
+            - name: JICOFO_AUTH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: jitsi-secret
+                  key: JICOFO_AUTH_PASSWORD
+            - name: JVB_BREWERY_MUC
+              value: jvbbrewery
+            - name: TZ
+              value: Europe/Berlin
+            - name: JVB_ENABLE_APIS
+              value: rest,colibri
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1000Mi
+            requests:
+              cpu: 500m
+              memory: 250Mi

@@ -1,0 +1,23 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: prometheus-monitor-jitsi-exporter
+  namespace: monitoring
+  labels:
+    app: prometheus-operator
+    release: prometheus-operator
+
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: jitsi-exporter
+      app.kubernetes.io/name: jitsi-exporter
+  namespaceSelector:
+    matchNames:
+      - jitsi
+  podMetricsEndpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s

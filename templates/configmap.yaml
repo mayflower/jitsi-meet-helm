@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jitsi-env
+  namespace: {{ .Release.Namespace }}
+
+data:
+  PUBLIC_URL: https://jitsi.aletro.k8s.gomeetup.site
+  XMPP_SERVER: localhost
+  XMPP_DOMAIN: meet.jitsi
+  XMPP_AUTH_DOMAIN: auth.meet.jitsi
+  XMPP_INTERNAL_MUC_DOMAIN: internal-muc.meet.jitsi
+  JICOFO_AUTH_USER: focus
+  TZ: Europe/Berlin
+  JVB_BREWERY_MUC: jvbbrewery
