@@ -20,11 +20,11 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`jitsi.aletro.k8s.gomeetup.site`)
+    - match: Host(`meet.jitsi.neotokyo.space`)
       kind: Rule
       services:
         - name: web
           namespace: {{ .Release.Namespace }}
-          port: 80
+          port: 443
   tls:
     certResolver: default

@@ -6,8 +6,8 @@ metadata:
 
 spec:
   endpoints:
-    - dnsName: jitsi.aletro.k8s.gomeetup.site
+    - dnsName: meet.jitsi.neotokyo.space
       recordTTL: 300
       recordType: A
       targets:
-        - 116.203.5.183
+        - 116.203.8.196
